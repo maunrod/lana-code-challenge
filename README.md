@@ -18,7 +18,7 @@ In order to give solution to the need of having an architecture to compute stati
 ![architecture_aws](img/aws_architecture.png) 
 
 * Input data is stored in S3
-* Job are defined using Apache Beam. Apache Spark is used as for computing in a distributed way (EMR is the service that support this step)
+* Job are defined using Apache Beam. Apache Spark is used for computing in a distributed way (EMR is the Amazon service that support this step)
 * Result of processing is saved as parquet in S3. A semantic layer is created by using the Glue service.
 * In case we need to add to this architecture the ability to process data coming from Streaming, we can do it by adding 2 components (from the AWS tools ecosystem):
     * Input data: AWS Kinesis Streams (streams with data to be processed)
@@ -30,12 +30,12 @@ In order to give solution to the need of having an architecture to compute stati
     ```sh
     $ git clone https://github.com/maunrod/lana-code-challenge.git
     ``` 
-2. Go to the root folder of the repository and build the package (jar file will be created in the target folder)
+2. Go to the root folder of the repository and build the package (JARs files will be created in the target folder)
     ```sh
     $ cd LanaCodeChallenge
     $ ./mvnw clean package
     ``` 
-3. Two JAR files will be generated in the target folder of the project. Use the file called _LanaCodeChallenge-1.0-SNAPSHOT-shaded.jar_ (contains all dependencies required)
+3. Two JAR files will be generated in the target folder of the project. Use the file called _LanaCodeChallenge-1.0-shaded.jar_ (contains all dependencies required)
 
 ## Environment Variables
 In order to make the executions more flexible and customizable, some environment variables were added.
@@ -52,7 +52,7 @@ In order to make the executions more flexible and customizable, some environment
 
 
 ## Execution
-First of all, set/unset environment variables to customize the executions. Remember to set those mandatory variables to avoid errors!
+First of all, set/unset environment variables to customize the executions. Remember to set the mandatory variables to avoid errors!
 ```sh
 export AWS_ACCESS_KEY=<YOUR-ACCESS-KEY>
 export AWS_SECRET_ACCESS_KEY=<YOUR-SECRET-ACCESS-KEY>
@@ -63,7 +63,7 @@ This job calculates the N most common words found in the files provided. To chan
 
 ###### Execution
 ```sh
-spark-submit --master local --class com.lana.challenge.pipeline.MostCommonWords target/LanaCodeChallenge-1.0-SNAPSHOT-shaded.jar
+spark-submit --master local --class com.lana.challenge.pipeline.MostCommonWords target/LanaCodeChallenge-1.0-shaded.jar
 ```
 
 ###### Output
@@ -81,13 +81,14 @@ spark-submit --master local --class com.lana.challenge.pipeline.MostCommonWords 
 ###### Assumptions
 * Regular expression used to define what is considered a word: [^\\p{L}]+
 * Contractions are splitted and considered as different words. Example: touch'd -> [touch,d]
+* In order to process ONLY dialogs between characters, only files within folders with suffix _characters were considered.
 
 #### N Longest words
 This job calculates the N longest words found in the files provided. To change the N value, setup the environment variable MAX_OUTPUT_LINES.
 
 ###### Execution
 ```sh
-spark-submit --master local --class com.lana.challenge.pipeline.LongestWords target/LanaCodeChallenge-1.0-SNAPSHOT-shaded.jar
+spark-submit --master local --class com.lana.challenge.pipeline.LongestWords target/LanaCodeChallenge-1.0-shaded.jar
 ```
 
 ###### Output
@@ -104,6 +105,7 @@ spark-submit --master local --class com.lana.challenge.pipeline.LongestWords tar
 ###### Assumptions
 * Regular expression used to define what is considered a word: [^\\p{L}]+
 * Contractions are splitted and considered as different words. Example: i'm -> [i,m]
+* In order to process ONLY dialogs between characters, only files within folders with suffix _characters were considered.
 
 
 #### N Longest sentences
@@ -111,7 +113,7 @@ This job calculates the N longest sentences found in the files provided. To chan
 
 ###### Execution
 ```sh
-spark-submit --master local --class com.lana.challenge.pipeline.LongestWords target/LanaCodeChallenge-1.0-SNAPSHOT-shaded.jar
+spark-submit --master local --class com.lana.challenge.pipeline.LongestWords target/LanaCodeChallenge-1.0-shaded.jar
 ```
 
 ###### Output
@@ -129,5 +131,4 @@ spark-submit --master local --class com.lana.challenge.pipeline.LongestWords tar
 * Delimiters used to define a a sentence are ".|!|?"
 * All empty spaces are removed both left and right.
 * Multiples spaces in the middle of the sentences are replaced by a single space.
-
-
+* In order to process ONLY dialogs between characters, only files within folders with suffix _characters were considered.
