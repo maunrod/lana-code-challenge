@@ -65,7 +65,7 @@ public class MostCommonWords {
         options.setRunner(SPARK_RUNNER);
 
         // AWS configuration
-        options.setAwsCredentialsProvider(new EnvironmentVariableCredentialsProvider());
+        options.setAwsCredentialsProvider(new EnvironmentVariableCredentialsProvider()); // Get AWS Credentials from environment
         options.setAwsRegion(System.getenv("AWS_DEFAULT_REGION") == null ? DEFAULT_AWS_REGION : System.getenv("AWS_DEFAULT_REGION").toLowerCase());
         options.setAwsServiceEndpoint(String.format("https://s3.%s.amazonaws.com", options.getAwsRegion()));
 

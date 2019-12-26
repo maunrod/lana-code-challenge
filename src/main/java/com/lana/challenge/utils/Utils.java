@@ -9,5 +9,4 @@ public final class Utils {
     public static final String DEFAULT_S3_SEARCH_PATTERN= "s3://lana-code-challenge/in/ShakespearePlaysPlus/**/*_characters/*";
     public static final String DEFAULT_S3_OUT_PREFIX = "s3://lana-code-challenge/out/";
     public static final String DEFAULT_S3_TMP_PREFIX = "s3://lana-code-challenge/tmp/";
-
 }
