@@ -1,6 +1,6 @@
 ![lana_logo](img/logo_lana.png) 
 # Code Challenge for Data Engineers
-This project is the solution (only one of the possible solutions!) for the challenge explained in https://github.com/cabify/dataeng_challenge  
+This project is the solution (only one of the possible solutions!) for the challenge explained [here](https://github.com/cabify/dataeng_challenge).    
 This development was written entirely in Java, using the following set of tools/platforms:
 - OpenJDK 12
 - Maven 3.6.3
