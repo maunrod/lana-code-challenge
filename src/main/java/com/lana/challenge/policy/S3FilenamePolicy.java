@@ -10,7 +10,6 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import javax.annotation.Nullable;
 import java.time.Instant;
 
 public class S3FilenamePolicy extends FileBasedSink.FilenamePolicy {
@@ -50,7 +49,6 @@ public class S3FilenamePolicy extends FileBasedSink.FilenamePolicy {
         return this.s3OutPrefixWindowed.resolve(filename, StandardResolveOptions.RESOLVE_FILE);
     }
 
-    @Nullable
     @Override
     public ResourceId unwindowedFilename(int shardNumber, int numShards, FileBasedSink.OutputFileHints outputFileHints) {
         String filename =

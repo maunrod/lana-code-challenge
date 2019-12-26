@@ -79,12 +79,12 @@ public class LongestWords {
                 .apply("FlattenList", Flatten.iterables())
                 .apply("FilterUniques", Distinct.create())
                 .apply("TopN", Top.of(maxOutputLines, new SortStringByLength()))
-                .apply("FormatResult", FlatMapElements.into(TypeDescriptors.strings()).via((List<String> wordLength) -> wordLength.stream().map(e -> String.format("%s;%d", e, e.length())).collect(Collectors.toList())))
+                .apply("FormatResult", FlatMapElements.into(TypeDescriptors.strings()).via((List<String> wordLength) -> wordLength.stream().map(e -> String.format("%s|%d", e, e.length())).collect(Collectors.toList())))
                 .apply("PrintResult", MapElements.into(TypeDescriptors.strings()).via((String wordLength) -> {
                     LOG.info(wordLength);
                     return wordLength;
                 }))
-                .apply("WriteResultToStorage", TextIO.write().to(new S3FilenamePolicy(s3OutPrefix, options.getJobName(), "csv")).withTempDirectory(tmpResourceId).withHeader("word;length"));
+                .apply("WriteResultToStorage", TextIO.write().to(new S3FilenamePolicy(s3OutPrefix, options.getJobName(), "csv")).withTempDirectory(tmpResourceId).withHeader("word|length"));
 
         // ------------------
         // PIPELINE EXECUTION

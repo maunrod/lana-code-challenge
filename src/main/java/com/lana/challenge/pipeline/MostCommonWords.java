@@ -80,12 +80,12 @@ public class MostCommonWords {
                 .apply("FlattenList", Flatten.iterables())
                 .apply("CalculateWordsOccurrences", Count.perElement())
                 .apply("TopN", Top.of(maxOutputLines, new SortKVByOccurrences()))
-                .apply("FormatResult", FlatMapElements.into(TypeDescriptors.strings()).via((List<KV<String, Long>> wordsCount) -> wordsCount.stream().map(e -> String.format("%s;%d", e.getKey(), e.getValue())).collect(Collectors.toList())))
+                .apply("FormatResult", FlatMapElements.into(TypeDescriptors.strings()).via((List<KV<String, Long>> wordsCount) -> wordsCount.stream().map(e -> String.format("%s|%d", e.getKey(), e.getValue())).collect(Collectors.toList())))
                 .apply("PrintResult", MapElements.into(TypeDescriptors.strings()).via((String wordCount) -> {
                     LOG.info(wordCount);
                     return wordCount;
                 }))
-                .apply("WriteResultToStorage", TextIO.write().to(new S3FilenamePolicy(s3OutPrefix, options.getJobName(), "csv")).withTempDirectory(tmpResourceId).withHeader("word;occurrences"));
+                .apply("WriteResultToStorage", TextIO.write().to(new S3FilenamePolicy(s3OutPrefix, options.getJobName(), "csv")).withTempDirectory(tmpResourceId).withHeader("word|occurrences"));
 
         // ------------------
         // PIPELINE EXECUTION

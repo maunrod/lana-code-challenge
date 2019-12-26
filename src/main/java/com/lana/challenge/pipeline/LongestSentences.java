@@ -102,12 +102,12 @@ public class LongestSentences {
                 .apply("ExtractSentences", ParDo.of(new ExtractSentences()))
                 .apply("FlattenList", Flatten.iterables())
                 .apply("TopN", Top.of(maxOutputLines, new SortStringByLength()))
-                .apply("FormatResult", FlatMapElements.into(TypeDescriptors.strings()).via((List<String> sentenceLength) -> sentenceLength.stream().map(e -> String.format("%s;%d", e, e.length())).collect(Collectors.toList())))
+                .apply("FormatResult", FlatMapElements.into(TypeDescriptors.strings()).via((List<String> sentenceLength) -> sentenceLength.stream().map(e -> String.format("%s|%d", e, e.length())).collect(Collectors.toList())))
                 .apply("PrintResult", MapElements.into(TypeDescriptors.strings()).via((String sentenceLength) -> {
                     LOG.info(sentenceLength);
                     return sentenceLength;
                 }))
-                .apply("WriteResultToStorage", TextIO.write().to(new S3FilenamePolicy(s3OutPrefix, options.getJobName(), "csv")).withTempDirectory(tmpResourceId).withHeader("sentence;length"));
+                .apply("WriteResultToStorage", TextIO.write().to(new S3FilenamePolicy(s3OutPrefix, options.getJobName(), "csv")).withTempDirectory(tmpResourceId).withHeader("sentence|length"));
 
         // ------------------
         // PIPELINE EXECUTION
