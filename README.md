@@ -31,29 +31,72 @@ In order to give solution to the need of having an architecture to compute
 ## Environment Variables
 In order to make the executions more flexible and customizable, some environment variables were added.
 
-| Variable | Description | Value | Mandatory | Default |
-| -------- | ----------- | ----- | --------- | ------- |
-| MAX_OUTPUT_LINES | Max Number of Results to show/write |  | NO | 5 |
-| AWS_ACCESS_KEY | AWS Access Key | AKIAQPRE4WXIZHFDQGNY | YES | |
-| AWS_SECRET_ACCESS_KEY | AWS Access Key | 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 | YES | |
-| AWS_DEFAULT_REGION | AWS Default Region Name |  | NO | us-east-2 |
-| S3_SEARCH_PATTERN | S3 prefix where the input data is (glob wildcards allowed) |  | NO | s3://lana-code-challenge/in/ShakespearePlaysPlus/\*\*/\*\_characters/\* |
-| S3_TMP_PREFIX | S3 prefix to save temporal files |  | NO |s3://lana-code-challenge/tmp/ |
-
-## Assumptions
+| Variable | Description | Mandatory | Default |
+| -------- | ----------- | --------- | ------- |
+| MAX_OUTPUT_LINES | Max Number of Results to show/write | NO | 5 |
+| AWS_ACCESS_KEY | AWS Access Key | YES | - |
+| AWS_SECRET_ACCESS_KEY | AWS Access Key | YES | - |
+| AWS_DEFAULT_REGION | AWS Default Region Name | NO | us-east-2 |
+| S3_SEARCH_PATTERN | S3 prefix where the input data is (glob wildcards allowed) | NO | s3://lana-code-challenge/in/ShakespearePlaysPlus/\*\*/\*\_characters/\* |
+| S3_TMP_PREFIX | S3 prefix to save temporal files | NO |s3://lana-code-challenge/tmp/ |
+| S3_OUT_PREFIX | S3 prefix to write final files | NO |s3://lana-code-challenge/out/ |
 
 
 ## Execution
-First of all, set/unset environment variables to customize the executions. Remember to set those mandatory variables using the value provided in the column named _Value_!
+First of all, set/unset environment variables to customize the executions. Remember to set those mandatory variables to avoid errors!
 ```sh
-export AWS_ACCESS_KEY=AKIAQPRE4WXIZHFDQGNY
-export AWS_SECRET_ACCESS_KEY=xuVOBKcTKhzMVikR21sh+otE7IFH9brOD13Z5ezG
+export AWS_ACCESS_KEY=<YOUR-ACCESS-KEY>
+export AWS_SECRET_ACCESS_KEY=<YOUR-SECRET-ACCESS-KEY>
 ```
 
 #### N Most common words
-This job calculates the N most common words
+This job calculates the N most common words found in the files provided. To change the N value, setup the environment variable MAX_OUTPUT_LINES.
+
+###### Execution
+```sh
+spark-submit --master local --class com.lana.challenge.pipeline.MostCommonWords target/LanaCodeChallenge-1.0-SNAPSHOT-shaded.jar
+```
+
+###### Output
+
+| word | occurrences | 
+| ---- | ----------- | 
+|the   | 26591       |
+|and   | 23925       |
+|i     | 22329       |
+|to    | 19074       |
+|of    | 15888       |
+
+> Results are written on S3 as CSV (pipe delimited), in the path S3_OUT_PREFIX (or its default value) under the folder MostCommonWordsJob
+
+###### Assumptions
+* Regular expression used to define what is considered a word: [^\\p{L}]+
+* Contractions are splitted and considered as different words. Example: touch'd -> [touch,d]
 
 #### N Longest words
+This job calculates the N longest words found in the files provided. To change the N value, setup the environment variable MAX_OUTPUT_LINES.
+
+###### Execution
+```sh
+spark-submit --master local --class com.lana.challenge.pipeline.LongestWords target/LanaCodeChallenge-1.0-SNAPSHOT-shaded.jar
+```
+
+###### Output
+| word | length | 
+| ---- | ------ | 
+|honorificabilitudinitatibus|27|
+|undistinguishable|17|
+|indistinguishable|17|
+|anthropophaginian|17|
+|superserviceable|16|
+
+> Results are written on S3 as CSV (pipe delimited), in the path S3_OUT_PREFIX (or its default value) under the folder LongestWordsJob
+
+###### Assumptions
+* Regular expression used to define what is considered a word: [^\\p{L}]+
+* Contractions are splitted and considered as different words. Example: i'm -> [i,m]
+
 
 #### N Longest sentences
+
 
