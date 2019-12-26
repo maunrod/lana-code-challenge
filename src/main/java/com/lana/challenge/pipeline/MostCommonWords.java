@@ -24,7 +24,7 @@ import static com.lana.challenge.utils.Utils.*;
 
 public class MostCommonWords {
     /**
-     * Calculate N most common words in a set of files stored in given S3 path
+     * Calculate Top N most common words in a set of files stored in given S3 path
      */
     private static final Logger LOG = LoggerFactory.getLogger(MostCommonWords.class);
     private static class ExtractWords extends DoFn<String, List<String>> {
@@ -61,7 +61,7 @@ public class MostCommonWords {
         // ----------------
         // runner configuration
         S3Options options = PipelineOptionsFactory.as(S3Options.class);
-        options.setJobName("CalculateMostCommonWords");
+        options.setJobName("MostCommonWordsJob");
         options.setRunner(SPARK_RUNNER);
 
         // AWS configuration

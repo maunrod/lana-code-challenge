@@ -15,22 +15,46 @@ import org.apache.beam.sdk.values.TypeDescriptors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.lana.challenge.utils.Utils.*;
 
-public class LongestWords {
+public class LongestSentences {
     /**
-     * Calculate Top N longest words in a set of files stored in given S3 path
+     * Calculate Top N longest sentences in a set of files stored in given S3 path
      */
-    private static final Logger LOG = LoggerFactory.getLogger(LongestWords.class);
-    private static class ExtractWords extends DoFn<String, List<String>> {
+    private static final Logger LOG = LoggerFactory.getLogger(LongestSentences.class);
+    private static class ExtractSentences extends DoFn<String, List<String>> {
         @ProcessElement
         public void processElement(ProcessContext c) {
-            String lineCleaned = c.element().replaceAll("\\<.*?\\>", "").trim().toLowerCase(); // remove tags
-            if (!lineCleaned.isEmpty()) c.output(Arrays.asList(lineCleaned.split("[^\\p{L}]+"))); // return list of tokens parsed without empty values
+            List<String> cleanedSentences = Arrays.stream((c.element() + " ").split("\\<.*?\\>")) // split by tags to avoid mixing sentences from different sections
+                    .map(e -> e.replaceAll("\\n\\r|\\n|\\r", " ").replaceAll("\\s{2,}", " ")) // replace CRLF characters and multiples spaces
+                    .map(e -> Arrays.stream(e.split("\\!")).collect(Collectors.toList())) // split by !
+                    .flatMap(e -> {
+                        if (e.size() == 1) return e.stream();
+                        else {
+                            List<String> formattedList = new ArrayList<>();
+                            for (int i = 0; i <= e.size() - 2; i++) formattedList.add(e.get(i) + "!");
+                            formattedList.add(e.get(e.size()-1));
+                            return formattedList.stream();
+                        }
+                    }) // add ! at the end of each sentence to keep the original punctuation and meaning/sense of the line
+                    .map(e -> Arrays.stream(e.split("\\?")).collect(Collectors.toList())) // split by ?
+                    .flatMap(e -> {
+                        if (e.size() == 1) return e.stream().map(String::trim);
+                        else {
+                            List<String> formattedList = new ArrayList<>();
+                            for (int i = 0; i <= e.size() - 2; i++) formattedList.add((e.get(i) + "?").trim());
+                            formattedList.add(e.get(e.size()-1).trim());
+                            return formattedList.stream();
+                        }
+                    }) // add ? at the end of each sentence to keep the original punctuation and meaning/sense of the line
+                    .filter(e -> !e.isEmpty()) // remove empty sentences
+                    .collect(Collectors.toList());
+            c.output(cleanedSentences);
         }
     }
 
@@ -60,7 +84,7 @@ public class LongestWords {
         // ----------------
         // runner configuration
         S3Options options = PipelineOptionsFactory.as(S3Options.class);
-        options.setJobName("LongestWordsJob");
+        options.setJobName("LongestSentencesJob");
         options.setRunner(SPARK_RUNNER);
 
         // AWS configuration
@@ -74,17 +98,16 @@ public class LongestWords {
         Pipeline p = Pipeline.create(options);
         ResourceId tmpResourceId = FileBasedSink.convertToFileResourceIfPossible(s3TmpPrefix);
 
-        p.apply("ReadFromStorage", TextIO.read().from(s3SearchPattern))
-                .apply("ExtractWords", ParDo.of(new ExtractWords()))
+        p.apply("ReadFromStorage", TextIO.read().from(s3SearchPattern).withDelimiter(new byte[] {'.'}))
+                .apply("ExtractSentences", ParDo.of(new ExtractSentences()))
                 .apply("FlattenList", Flatten.iterables())
-                .apply("FilterUniques", Distinct.create())
                 .apply("TopN", Top.of(maxOutputLines, new SortStringByLength()))
-                .apply("FormatResult", FlatMapElements.into(TypeDescriptors.strings()).via((List<String> wordLength) -> wordLength.stream().map(e -> String.format("%s;%d", e, e.length())).collect(Collectors.toList())))
-                .apply("PrintResult", MapElements.into(TypeDescriptors.strings()).via((String wordLength) -> {
-                    LOG.info(wordLength);
-                    return wordLength;
+                .apply("FormatResult", FlatMapElements.into(TypeDescriptors.strings()).via((List<String> sentenceLength) -> sentenceLength.stream().map(e -> String.format("%s;%d", e, e.length())).collect(Collectors.toList())))
+                .apply("PrintResult", MapElements.into(TypeDescriptors.strings()).via((String sentenceLength) -> {
+                    LOG.info(sentenceLength);
+                    return sentenceLength;
                 }))
-                .apply("WriteResultToStorage", TextIO.write().to(new S3FilenamePolicy(s3OutPrefix, options.getJobName(), "csv")).withTempDirectory(tmpResourceId).withHeader("word;length"));
+                .apply("WriteResultToStorage", TextIO.write().to(new S3FilenamePolicy(s3OutPrefix, options.getJobName(), "csv")).withTempDirectory(tmpResourceId).withHeader("sentence;length"));
 
         // ------------------
         // PIPELINE EXECUTION
@@ -94,5 +117,3 @@ public class LongestWords {
         LOG.info(pipelineState.name());
     }
 }
-
-
