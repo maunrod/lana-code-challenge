@@ -33,7 +33,6 @@
     <orderEntry type="library" name="Maven: org.codehaus.woodstox:stax2-api:3.1.4" level="project" />
     <orderEntry type="library" name="Maven: org.codehaus.woodstox:woodstox-core-asl:4.4.1" level="project" />
     <orderEntry type="library" name="Maven: javax.xml.stream:stax-api:1.0-2" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.beam:beam-sdks-java-extensions-sorter:2.16.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.beam:beam-sdks-java-io-amazon-web-services:2.16.0" level="project" />
     <orderEntry type="library" name="Maven: com.amazonaws:aws-java-sdk-cloudwatch:1.11.519" level="project" />
     <orderEntry type="library" name="Maven: com.amazonaws:jmespath-java:1.11.519" level="project" />
